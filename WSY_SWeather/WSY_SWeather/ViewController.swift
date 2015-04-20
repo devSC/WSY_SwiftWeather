@@ -57,6 +57,26 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
+    func updateWeatherInfo(latitude: CLLocationDegrees, longitude: CLLocationDegrees) {
+        let url = "http://api.openweathermap.org/data/2.5/forecast"
+        let params = ["lat": latitude, "lon": longitude]
+        
+        println(params)
+        
+        
+        
+    }
+    //MARK: - CLLocationManagerDelegate
+    func locationManager(manager: CLLocationManager!, didUpdateLocations locations: [AnyObject]!) {
+        var location: CLLocation = locations[locations.count - 1] as! CLLocation
+        if location.horizontalAccuracy > 0 {
+            self.locationManager.stopUpdatingLocation()
+            println(location.coordinate)
+            
+            updateWeatherInfo(location.coordinate.latitude, longitude: location.coordinate.longitude)
+        }
+    }
 
 
 }
