@@ -11,7 +11,7 @@ import QuartzCore
 import Alamofire
 
 class PhotoViewerViewController: UIViewController, UIScrollViewDelegate, UIPopoverPresentationControllerDelegate, UIActionSheetDelegate {
-  var photoID: Int = 0
+  var photoID: Int = 0 // Is set by the collection view while performing a segue to this controller.
   
   let scrollView = UIScrollView()
   let imageView = UIImageView()
@@ -24,56 +24,21 @@ class PhotoViewerViewController: UIViewController, UIScrollViewDelegate, UIPopov
   override func viewDidLoad() {
     super.viewDidLoad()
     
-    setupView()
-    loadPhoto()
-    
-  }
-    func downloadImage() {
-    
-
-    }
-  
-    func loadPhoto() {
-      Alamofire.request(Five100px.Router.PhotoInfo(self.photoID, .Large)).validate().responseObject() { //<#completionHandler: (NSURLRequest, NSHTTPURLResponse?, T?, NSError?) -> Void##(NSURLRequest, NSHTTPURLResponse?, T?, NSError?) -> Void#>
-            //(_, _, photoInfo: PhotoInfo?, error) in是响应序列化方法的参数。刚开始的两个下划线"_"意味着我们忽略了前两个参数，我们无需明确地将它们明确命名为request和response。
-            //第三个参数明确被声明为了我们的PhotoInfo实例，因此通用序列化方法将自行初始化，并返回该类型的一个对象，其包含有图片 URL。第二个 Alamofire 请求使用您先前创建过的图片序列化方法，将NSData转化为UIImage，以便之后我们在图片视图中显示它。
-            (_, _, photoInfo: PhotoInfo?, error) in
-            
-            //注意：我们不在这里使用路由，因为我们已经有了图片的绝对 URL 地址，我们无需自行构造 URL。
-            
-
-            
-            if error == nil {
-                self.photoInfo = photoInfo
-                dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                    self.addButtomBar()
-                    self.title = photoInfo?.name
-                })
-            }
-            
-            Alamofire.request( .GET, photoInfo!.url).validate().responseImage() {
-                (_, _, image, error) in
-                if error == nil && image != nil {
-                    self.imageView.image = image
-                    self.imageView.frame = self.centerFrameFromImage(image)
-                    
-                    self.spinner.stopAnimating()
-                    self.centerScrollViewContents()
-                }
-            }
-            
-            
-        }
-    }
-    
-  func setupView() {
     navigationController?.setNavigationBarHidden(false, animated: true)
+
+    setupView()
     
+    loadPhoto()
+  }
+  
+  func setupView() {
+    // Visual feedback to the user, so they know we're busy loading an image
     spinner.center = CGPoint(x: view.center.x, y: view.center.y - view.bounds.origin.y / 2.0)
     spinner.hidesWhenStopped = true
     spinner.startAnimating()
     view.addSubview(spinner)
     
+    // A scroll view is used to allow zooming
     scrollView.frame = view.bounds
     scrollView.delegate = self
     scrollView.minimumZoomScale = 1.0
@@ -88,17 +53,43 @@ class PhotoViewerViewController: UIViewController, UIScrollViewDelegate, UIPopov
     doubleTapRecognizer.numberOfTapsRequired = 2
     doubleTapRecognizer.numberOfTouchesRequired = 1
     scrollView.addGestureRecognizer(doubleTapRecognizer)
-    
-    let singleTapRecognizer = UITapGestureRecognizer(target: self, action: "handleSingleTap:")
-    singleTapRecognizer.numberOfTapsRequired = 1
-    singleTapRecognizer.numberOfTouchesRequired = 1
-    singleTapRecognizer.requireGestureRecognizerToFail(doubleTapRecognizer)
-    scrollView.addGestureRecognizer(singleTapRecognizer)
+  }
+  
+  func loadPhoto() {
+    Alamofire.request(Five100px.Router.PhotoInfo(self.photoID, .Large)).validate().responseObject() {
+      (_, _, photoInfo: PhotoInfo?, error) in
+      
+      if error == nil {
+        // Store it for Details Controller
+        self.photoInfo = photoInfo
+        
+        dispatch_async(dispatch_get_main_queue()) {
+          self.addButtomBar()
+          self.title = photoInfo!.name
+        }
+        
+        Alamofire.request(.GET, photoInfo!.url).validate().responseImage() {
+          (_, _, image, error) in
+          
+          if error == nil && image != nil {
+            self.imageView.image = image
+            self.imageView.frame = self.centerFrameFromImage(image)
+            
+            self.spinner.stopAnimating()
+            
+            self.centerScrollViewContents()
+          }
+        }
+      } else {
+        println("Could not get photo info: \(error!)")
+      }
+    }
   }
   
   override func viewWillAppear(animated: Bool) {
     super.viewWillAppear(animated)
     
+    // If the network is fast, the photo may be loaded before the view appears, but we still want an animation
     if photoInfo != nil {
       navigationController?.setToolbarHidden(false, animated: true)
     }
@@ -131,18 +122,8 @@ class PhotoViewerViewController: UIViewController, UIScrollViewDelegate, UIPopov
     
     self.setToolbarItems(items, animated: true)
     navigationController?.setToolbarHidden(false, animated: true)
-    
-    navigationItem.rightBarButtonItem = UIBarButtonItem(customView: userInfoViewForPhotoInfo(photoInfo!))
   }
   
-  func userInfoViewForPhotoInfo(photoInfo: PhotoInfo) -> UIView {
-    let userProfileImageView = UIImageView(frame: CGRect(x: 0, y: 10.0, width: 30.0, height: 30.0))
-    userProfileImageView.layer.cornerRadius = 3.0
-    userProfileImageView.layer.masksToBounds = true
-    
-    return userProfileImageView
-  }
-
   func showDetails() {
     let photoDetailsViewController = storyboard?.instantiateViewControllerWithIdentifier("PhotoDetails") as? PhotoDetailsViewController
     photoDetailsViewController?.modalPresentationStyle = .OverCurrentContext
@@ -161,10 +142,12 @@ class PhotoViewerViewController: UIViewController, UIScrollViewDelegate, UIPopov
     presentViewController(photoCommentsViewController!, animated: true, completion: nil)
   }
   
+  // Needed for the Comments Popover
   func adaptivePresentationStyleForPresentationController(controller: UIPresentationController) -> UIModalPresentationStyle {
     return UIModalPresentationStyle.OverCurrentContext
   }
   
+  // Needed for the Comments Popover
   func presentationController(controller: UIPresentationController, viewControllerForAdaptivePresentationStyle style: UIModalPresentationStyle) -> UIViewController? {
     let navController = UINavigationController(rootViewController: controller.presentedViewController)
     
@@ -200,6 +183,44 @@ class PhotoViewerViewController: UIViewController, UIScrollViewDelegate, UIPopov
   
   // MARK: Download Photo
   
+  func downloadPhoto() {
+    // We already have the photoInfo but we prefer to request a new one with XLarge photo size URL
+    Alamofire.request(Five100px.Router.PhotoInfo(photoInfo!.id, .XLarge)).validate().responseObject() {
+      (_, _, photoInfo: PhotoInfo?, error) in
+      
+      if error == nil && photoInfo != nil {
+        let imageURL = photoInfo!.url
+        
+        let destination: (NSURL, NSHTTPURLResponse) -> (NSURL) = {
+          (temporaryURL, response) in
+          
+          if let directoryURL = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask)[0] as? NSURL {
+            return directoryURL.URLByAppendingPathComponent("\(self.photoInfo!.id).\(response.suggestedFilename)")
+          }
+          
+          return temporaryURL
+        }
+        
+        let progressIndicatorView = UIProgressView(frame: CGRect(x: 0.0, y: 80.0, width: self.view.bounds.width, height: 10.0))
+        progressIndicatorView.tintColor = UIColor.blueColor()
+        self.view.addSubview(progressIndicatorView)
+        
+        Alamofire.download(.GET, imageURL, destination).progress {
+          (_, totalBytesRead, totalBytesExpectedToRead) in
+          
+          dispatch_async(dispatch_get_main_queue()) {
+            progressIndicatorView.setProgress(Float(totalBytesRead) / Float(totalBytesExpectedToRead), animated: true)
+            
+            if totalBytesRead == totalBytesExpectedToRead {
+              progressIndicatorView.removeFromSuperview()
+            }
+          }
+        }
+        
+      }
+    }
+  }
+  
   func showActions() {
     let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: "Cancel", destructiveButtonTitle: nil, otherButtonTitles: "Download Photo")
     actionSheet.showFromToolbar(navigationController?.toolbar)
@@ -210,22 +231,12 @@ class PhotoViewerViewController: UIViewController, UIScrollViewDelegate, UIPopov
       downloadPhoto()
     }
   }
-  
-  func downloadPhoto() {
-  }
-  
+
   // MARK: Gesture Recognizers
   
   func handleDoubleTap(recognizer: UITapGestureRecognizer!) {
     let pointInView = recognizer.locationInView(self.imageView)
     self.zoomInZoomOut(pointInView)
-  }
-  
-  func handleSingleTap(recognizer: UITapGestureRecognizer!) {
-    let hidden = navigationController?.navigationBar.hidden ?? false
-    navigationController?.setNavigationBarHidden(!hidden, animated: true)
-    navigationController?.setToolbarHidden(!hidden, animated: true)
-    UIApplication.sharedApplication().setStatusBarHidden(!hidden, withAnimation: .Slide)
   }
   
   // MARK: ScrollView

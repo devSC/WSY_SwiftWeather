@@ -10,20 +10,53 @@
 		22056D1019AA62C900F7A88B /* PhotoViewerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22056D0F19AA62C900F7A88B /* PhotoViewerViewController.swift */; };
 		22056D1219AB16C100F7A88B /* PhotoDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22056D1119AB16C100F7A88B /* PhotoDetailsViewController.swift */; };
 		2246208219D49AED00B52F40 /* Five100px.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2246208119D49AED00B52F40 /* Five100px.swift */; };
+		229C99011ADAFB8700436390 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 229C98FA1ADAFB7200436390 /* Alamofire.framework */; };
+		229C99021ADAFB8700436390 /* Alamofire.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 229C98FA1ADAFB7200436390 /* Alamofire.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		22A9A53319AB38B7004287D2 /* PhotoCommentsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22A9A53219AB38B7004287D2 /* PhotoCommentsViewController.swift */; };
-		22C66D8719B4E66100B72DCF /* ProgressIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22C66D8619B4E66100B72DCF /* ProgressIndicatorView.swift */; };
 		22C66D8919B512BF00B72DCF /* DownloadedPhotoBrowserCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22C66D8819B512BF00B72DCF /* DownloadedPhotoBrowserCollectionViewController.swift */; };
 		22F2B01119A5C39900939296 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22F2B01019A5C39900939296 /* AppDelegate.swift */; };
 		22F2B01619A5C39900939296 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 22F2B01419A5C39900939296 /* Main.storyboard */; };
 		22F2B01819A5C39900939296 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 22F2B01719A5C39900939296 /* Images.xcassets */; };
 		22F2B02419A5C39A00939296 /* PhotomaniaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22F2B02319A5C39A00939296 /* PhotomaniaTests.swift */; };
 		22F2B03119A5C4B100939296 /* PhotoBrowserCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22F2B03019A5C4B100939296 /* PhotoBrowserCollectionViewController.swift */; };
-		7507B1251AE4D52D002EB168 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7507B11E1AE4D51E002EB168 /* Alamofire.framework */; };
-		7507B1261AE4D52D002EB168 /* Alamofire.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7507B11E1AE4D51E002EB168 /* Alamofire.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		FEFA70891AE52FEC00FAA153 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = FEFA70881AE52FEC00FAA153 /* LaunchScreen.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		229C98F91ADAFB7200436390 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 229C98F21ADAFB7200436390 /* Alamofire.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F8111E3319A95C8B0040E7D1;
+			remoteInfo = "Alamofire iOS";
+		};
+		229C98FB1ADAFB7200436390 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 229C98F21ADAFB7200436390 /* Alamofire.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4DD67C0B1A5C55C900ED2280;
+			remoteInfo = "Alamofire OSX";
+		};
+		229C98FD1ADAFB7200436390 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 229C98F21ADAFB7200436390 /* Alamofire.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F8111E3E19A95C8B0040E7D1;
+			remoteInfo = "Alamofire iOS Tests";
+		};
+		229C98FF1ADAFB7200436390 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 229C98F21ADAFB7200436390 /* Alamofire.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F829C6B21A7A94F100A2CD59;
+			remoteInfo = "Alamofire OSX Tests";
+		};
+		229C99031ADAFB8700436390 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 229C98F21ADAFB7200436390 /* Alamofire.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = F8111E3219A95C8B0040E7D1;
+			remoteInfo = "Alamofire iOS";
+		};
 		22F2B01E19A5C39A00939296 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 22F2B00319A5C39900939296 /* Project object */;
@@ -31,51 +64,16 @@
 			remoteGlobalIDString = 22F2B00A19A5C39900939296;
 			remoteInfo = Photomania;
 		};
-		7507B11D1AE4D51E002EB168 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7507B1161AE4D51E002EB168 /* Alamofire.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = F8111E3319A95C8B0040E7D1;
-			remoteInfo = "Alamofire iOS";
-		};
-		7507B11F1AE4D51E002EB168 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7507B1161AE4D51E002EB168 /* Alamofire.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 4DD67C0B1A5C55C900ED2280;
-			remoteInfo = "Alamofire OSX";
-		};
-		7507B1211AE4D51E002EB168 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7507B1161AE4D51E002EB168 /* Alamofire.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = F8111E3E19A95C8B0040E7D1;
-			remoteInfo = "Alamofire iOS Tests";
-		};
-		7507B1231AE4D51E002EB168 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7507B1161AE4D51E002EB168 /* Alamofire.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = F829C6B21A7A94F100A2CD59;
-			remoteInfo = "Alamofire OSX Tests";
-		};
-		7507B1271AE4D52D002EB168 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7507B1161AE4D51E002EB168 /* Alamofire.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = F8111E3219A95C8B0040E7D1;
-			remoteInfo = "Alamofire iOS";
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		223F8FB419CB697D00750D7B /* Embed Frameworks */ = {
+		2227626B19EC9F1300CC22A2 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				7507B1261AE4D52D002EB168 /* Alamofire.framework in Embed Frameworks */,
+				229C99021ADAFB8700436390 /* Alamofire.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -86,8 +84,8 @@
 		22056D0F19AA62C900F7A88B /* PhotoViewerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoViewerViewController.swift; sourceTree = "<group>"; };
 		22056D1119AB16C100F7A88B /* PhotoDetailsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoDetailsViewController.swift; sourceTree = "<group>"; };
 		2246208119D49AED00B52F40 /* Five100px.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Five100px.swift; sourceTree = "<group>"; };
+		229C98F21ADAFB7200436390 /* Alamofire.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Alamofire.xcodeproj; path = "Alamofire-master/Alamofire.xcodeproj"; sourceTree = "<group>"; };
 		22A9A53219AB38B7004287D2 /* PhotoCommentsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoCommentsViewController.swift; sourceTree = "<group>"; };
-		22C66D8619B4E66100B72DCF /* ProgressIndicatorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressIndicatorView.swift; sourceTree = "<group>"; };
 		22C66D8819B512BF00B72DCF /* DownloadedPhotoBrowserCollectionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadedPhotoBrowserCollectionViewController.swift; sourceTree = "<group>"; };
 		22F2B00B19A5C39900939296 /* Photomania.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Photomania.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		22F2B00F19A5C39900939296 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -98,8 +96,6 @@
 		22F2B02219A5C39A00939296 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		22F2B02319A5C39A00939296 /* PhotomaniaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotomaniaTests.swift; sourceTree = "<group>"; };
 		22F2B03019A5C4B100939296 /* PhotoBrowserCollectionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoBrowserCollectionViewController.swift; sourceTree = "<group>"; };
-		7507B1161AE4D51E002EB168 /* Alamofire.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Alamofire.xcodeproj; path = "Alamofire-master/Alamofire.xcodeproj"; sourceTree = SOURCE_ROOT; };
-		FEFA70881AE52FEC00FAA153 /* LaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LaunchScreen.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,7 +103,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7507B1251AE4D52D002EB168 /* Alamofire.framework in Frameworks */,
+				229C99011ADAFB8700436390 /* Alamofire.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -121,9 +117,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		229C98F31ADAFB7200436390 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				229C98FA1ADAFB7200436390 /* Alamofire.framework */,
+				229C98FC1ADAFB7200436390 /* Alamofire.framework */,
+				229C98FE1ADAFB7200436390 /* Alamofire iOS Tests.xctest */,
+				229C99001ADAFB7200436390 /* Alamofire OSX Tests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		22F2B00219A5C39900939296 = {
 			isa = PBXGroup;
 			children = (
+				229C98F21ADAFB7200436390 /* Alamofire.xcodeproj */,
 				22F2B00D19A5C39900939296 /* Photomania */,
 				22F2B02019A5C39A00939296 /* PhotomaniaTests */,
 				22F2B00C19A5C39900939296 /* Products */,
@@ -142,18 +150,15 @@
 		22F2B00D19A5C39900939296 /* Photomania */ = {
 			isa = PBXGroup;
 			children = (
-				7507B1161AE4D51E002EB168 /* Alamofire.xcodeproj */,
 				22F2B01019A5C39900939296 /* AppDelegate.swift */,
 				22F2B03019A5C4B100939296 /* PhotoBrowserCollectionViewController.swift */,
 				22056D0F19AA62C900F7A88B /* PhotoViewerViewController.swift */,
 				22056D1119AB16C100F7A88B /* PhotoDetailsViewController.swift */,
 				22A9A53219AB38B7004287D2 /* PhotoCommentsViewController.swift */,
 				22C66D8819B512BF00B72DCF /* DownloadedPhotoBrowserCollectionViewController.swift */,
-				22C66D8619B4E66100B72DCF /* ProgressIndicatorView.swift */,
 				2246208119D49AED00B52F40 /* Five100px.swift */,
 				22F2B01419A5C39900939296 /* Main.storyboard */,
 				22F2B01719A5C39900939296 /* Images.xcassets */,
-				FEFA70881AE52FEC00FAA153 /* LaunchScreen.xib */,
 				22F2B00E19A5C39900939296 /* Supporting Files */,
 			);
 			path = Photomania;
@@ -184,17 +189,6 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		7507B1171AE4D51E002EB168 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				7507B11E1AE4D51E002EB168 /* Alamofire.framework */,
-				7507B1201AE4D51E002EB168 /* Alamofire.framework */,
-				7507B1221AE4D51E002EB168 /* Alamofire iOS Tests.xctest */,
-				7507B1241AE4D51E002EB168 /* Alamofire OSX Tests.xctest */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -205,12 +199,12 @@
 				22F2B00719A5C39900939296 /* Sources */,
 				22F2B00819A5C39900939296 /* Frameworks */,
 				22F2B00919A5C39900939296 /* Resources */,
-				223F8FB419CB697D00750D7B /* Embed Frameworks */,
+				2227626B19EC9F1300CC22A2 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				7507B1281AE4D52D002EB168 /* PBXTargetDependency */,
+				229C99041ADAFB8700436390 /* PBXTargetDependency */,
 			);
 			name = Photomania;
 			productName = Photomania;
@@ -266,8 +260,8 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 7507B1171AE4D51E002EB168 /* Products */;
-					ProjectRef = 7507B1161AE4D51E002EB168 /* Alamofire.xcodeproj */;
+					ProductGroup = 229C98F31ADAFB7200436390 /* Products */;
+					ProjectRef = 229C98F21ADAFB7200436390 /* Alamofire.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -279,32 +273,32 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		7507B11E1AE4D51E002EB168 /* Alamofire.framework */ = {
+		229C98FA1ADAFB7200436390 /* Alamofire.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = Alamofire.framework;
-			remoteRef = 7507B11D1AE4D51E002EB168 /* PBXContainerItemProxy */;
+			remoteRef = 229C98F91ADAFB7200436390 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		7507B1201AE4D51E002EB168 /* Alamofire.framework */ = {
+		229C98FC1ADAFB7200436390 /* Alamofire.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = Alamofire.framework;
-			remoteRef = 7507B11F1AE4D51E002EB168 /* PBXContainerItemProxy */;
+			remoteRef = 229C98FB1ADAFB7200436390 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		7507B1221AE4D51E002EB168 /* Alamofire iOS Tests.xctest */ = {
+		229C98FE1ADAFB7200436390 /* Alamofire iOS Tests.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = "Alamofire iOS Tests.xctest";
-			remoteRef = 7507B1211AE4D51E002EB168 /* PBXContainerItemProxy */;
+			remoteRef = 229C98FD1ADAFB7200436390 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		7507B1241AE4D51E002EB168 /* Alamofire OSX Tests.xctest */ = {
+		229C99001ADAFB7200436390 /* Alamofire OSX Tests.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = "Alamofire OSX Tests.xctest";
-			remoteRef = 7507B1231AE4D51E002EB168 /* PBXContainerItemProxy */;
+			remoteRef = 229C98FF1ADAFB7200436390 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -315,7 +309,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				22F2B01619A5C39900939296 /* Main.storyboard in Resources */,
-				FEFA70891AE52FEC00FAA153 /* LaunchScreen.xib in Resources */,
 				22F2B01819A5C39900939296 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -334,7 +327,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				22C66D8719B4E66100B72DCF /* ProgressIndicatorView.swift in Sources */,
 				22F2B03119A5C4B100939296 /* PhotoBrowserCollectionViewController.swift in Sources */,
 				22056D1219AB16C100F7A88B /* PhotoDetailsViewController.swift in Sources */,
 				2246208219D49AED00B52F40 /* Five100px.swift in Sources */,
@@ -356,15 +348,15 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		229C99041ADAFB8700436390 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "Alamofire iOS";
+			targetProxy = 229C99031ADAFB8700436390 /* PBXContainerItemProxy */;
+		};
 		22F2B01F19A5C39A00939296 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 22F2B00A19A5C39900939296 /* Photomania */;
 			targetProxy = 22F2B01E19A5C39A00939296 /* PBXContainerItemProxy */;
-		};
-		7507B1281AE4D52D002EB168 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "Alamofire iOS";
-			targetProxy = 7507B1271AE4D52D002EB168 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -462,10 +454,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = Photomania/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
@@ -474,10 +468,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = Photomania/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Release;
 		};

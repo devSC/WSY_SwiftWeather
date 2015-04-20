@@ -8,6 +8,94 @@
 
 import UIKit
 import Alamofire
+/* 
+将需要暴露给 Objective-C 使用的任何地方 (包括类，属性和方法等) 的声明前面加上 @objc 修饰符。注意这个步骤只需要对那些不是继承自 NSObject 的类型进行，如果你用 Swift 写的 class 是继承自 NSObject 的话，Swift 会默认自动为所有的非 private 的类和成员加上 @objc。这就是说，对一个 NSObject 的子类，你只需要导入相应的头文件就可以在 Objective-C 里使用这个类了。
+
+@objc 修饰符的另一个作用是为 Objective-C 侧重新声明方法或者变量的名字。虽然绝大部分时候自动转换的方法名已经足够好用 (比如会将 Swift 中类似 init(name: String) 的方法转换成 -initWithName:(NSString *)name 这样)，但是有时候我们还是期望 Objective-C 里使用和 Swift 中不一样的方法名或者类的名字，比如 Swift 里这样的一个类：
+
+class 我的类 {
+func 打招呼(名字: String) {
+println("哈喽，\(名字)")
+}
+}
+
+我的类().打招呼("小明")
+Objective-C 的话是无法使用中文来进行调用的，因此我们必须使用 @objc 将其转为 ASCII 才能在 Objective-C 里访问：
+
+@objc(MyClass)
+class 我的类 {
+@objc(greeting:)
+func 打招呼(名字: String) {
+println("哈喽，\(名字)")
+}
+}
+我们在 Objective-C 里就能调用 [[MyClass new] greeting:@"XiaoMing"] 这样的代码了 (虽然比起原来一点都不好玩了)。另外，正如上面所说的以及在 Selector 一节中所提到的，即使是 NSObject 的子类，Swift 也不会在被标记为 private 的方法或成员上自动加 @objc。如果我们需要使用这些内容的动态特性的话，我们需要手动给它们加上 @objc 修饰。
+
+添加 @objc 修饰符并不意味着这个方法或者属性会变成动态派发，Swift 依然可能会将其优化为静态调用。如果你需要和 Objective-C 里动态调用时相同的运行时特性的话，你需要使用的修饰符是 dynamic。一般情况下在做 app 开发时应该用不上，但是在施展一些像动态替换方法或者运行时再决定实现这样的 "黑魔法" 的时候，我们就需要用到 dynamic 修饰符了。在之后的 KVO 一节中，我们还会提到一个关于使用 dynamic 的实例。
+*/
+//http://www.raywenderlich.com/87595/intermediate-alamofire-tutorial
+//http://www.cocoachina.com/ios/20141203/10514.html
+@objc public protocol ResponseCollectionSerializable {
+    static func collection(#responser: NSHTTPURLResponse, representation: AnyObject) -> [Self]
+}
+extension Alamofire.Request {
+    public func responseCollection<T: ResponseCollectionSerializable>(completionHandler: (NSURLRequest, NSHTTPURLResponse?, T?, NSError?) -> Void) -> Self {
+        let serializer: Serializer = { (request, response, data) in
+            let JSONSerializer = Request.JSONResponseSerializer(options:  .AllowFragments)
+            let (JSON: AnyObject?, serializationError) = JSONSerializer(request, response, data)
+            if response != nil && JSON != nil {
+                return (T.collection(responser: response!, representation: JSON!), nil)
+            } else {
+                return (nil, serializationError)
+            }
+        }
+        return response(serializer: serializer, completionHandler: { (request, response, object, error) -> Void in
+            completionHandler(request, response, object as? T, error)
+        })
+    }
+}
+
+@objc public protocol ResponseObjectSerializable {
+    init(response: NSHTTPURLResponse, representation: AnyObject)
+}
+extension Alamofire.Request {
+    public func responseObject<T: ResponseObjectSerializable>(completionHandler: (NSURLRequest, NSHTTPURLResponse?, T?, NSError?) ->Void) -> Self {
+        let serializer: Serializer = { (request, response, data) in
+            let JSONSerializer = Request.JSONResponseSerializer(options: .AllowFragments)
+            let (JSON: AnyObject?, serializationError) = JSONSerializer(request, response, data)
+            if response != nil && JSON != nil {
+                return (T(response: response!, representation: JSON!), nil)
+            } else {
+                return (nil, serializationError)
+            }
+        }
+        
+        return response(serializer: serializer, completionHandler: {(request, response, object, error) in
+            completionHandler(request, response, object as? T, error)
+        })
+    }
+}
+
+
+extension Alamofire.Request {
+    class func imageResponseSerialize() -> Serializer {
+        return {
+            request, response, data in
+            if data == nil {
+                return (nil, nil)
+            }
+            let image = UIImage(data: data!, scale: UIScreen.mainScreen().scale)
+            return (image, nil)
+        }
+    }
+    
+    func responseImage(completionHandler: (NSURLRequest, NSHTTPURLResponse?, UIImage?, NSError?) -> Void) -> Self {
+        return response(queue: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), serializer: Request.imageResponseSerialize(), completionHandler: { (request, response, image, error) -> Void in
+            completionHandler(request, response, image as? UIImage, error)
+        })
+    }
+    
+}
 struct Five100px {
     enum Router: URLRequestConvertible {
 
@@ -86,7 +174,7 @@ struct Five100px {
   }
 }
 
-class PhotoInfo: NSObject {
+class PhotoInfo: NSObject, ResponseObjectSerializable {
   let id: Int
   let url: String
   
@@ -152,14 +240,24 @@ class PhotoInfo: NSObject {
   }
 }
 
-class Comment {
-  let userFullname: String
-  let userPictureURL: String
-  let commentBody: String
-  
-  init(JSON: AnyObject) {
-    userFullname = JSON.valueForKeyPath("user.fullname") as! String
-    userPictureURL = JSON.valueForKeyPath("user.userpic_url") as! String
-    commentBody = JSON.valueForKeyPath("body") as! String
-  }
+final class Comment: ResponseCollectionSerializable {
+    @objc static func collection(#responser: NSHTTPURLResponse, representation: AnyObject) -> [Comment] {
+        var comments = [Comment]()
+        
+        for comment in representation.valueForKeyPath("comments") as! [NSDictionary] {
+            comments.append(Comment(JSON: comment))
+        }
+        
+        return comments
+    }
+
+    let userFullname: String
+    let userPictureURL: String
+    let commentBody: String
+    
+    init(JSON: AnyObject) {
+        userFullname = JSON.valueForKeyPath("user.fullname") as! String
+        userPictureURL = JSON.valueForKeyPath("user.userpic_url") as! String
+        commentBody = JSON.valueForKeyPath("body") as! String
+    }
 }

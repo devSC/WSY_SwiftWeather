@@ -44,10 +44,21 @@ class PhotoBrowserCollectionViewController: UICollectionViewController, UICollec
   override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
     let cell = collectionView.dequeueReusableCellWithReuseIdentifier(PhotoBrowserCellIdentifier, forIndexPath: indexPath) as! PhotoBrowserCollectionViewCell
     let imageUrl = (photos.objectAtIndex(indexPath.row) as! PhotoInfo).url
-    Alamofire.request(.GET, imageUrl).response() {
-        (_, _, data, _) in
-        let image = UIImage(data: data! as! NSData)
-        cell.imageView.image = image
+//    Alamofire.request(.GET, imageUrl).response() {
+//        (_, _, data, _) in
+//        let image = UIImage(data: data! as! NSData)
+//        cell.imageView.image = image
+//    }
+    //way2
+    cell.imageView.image = nil
+    cell.request = Alamofire.request(.GET, imageUrl).responseImage() {
+        //{ (<#NSURLRequest#>, <#NSHTTPURLResponse?#>, <#UIImage?#>, <#NSError?#>) -> Void in
+        (request, _, image, error) in
+        if error == nil && image != nil {
+            if request.URLString == cell.request?.request.URLString {
+                cell.imageView.image = image
+            }
+        }
     }
     return cell
   }
@@ -61,7 +72,8 @@ class PhotoBrowserCollectionViewController: UICollectionViewController, UICollec
   }
   
   // MARK: Helper
-  
+    
+    
   func setupView() {
     navigationController?.setNavigationBarHidden(false, animated: true)
     
@@ -109,7 +121,7 @@ class PhotoBrowserCollectionViewController: UICollectionViewController, UICollec
   }
     
     func populatePhotos() {
-        
+        //2.populatePhotos()方法在currentPage当中加载图片，并且使用populatingPhotos作为标记，以防止还在加载当前界面时加载下一个页面。
         if populationPhotos {
             return
         }
@@ -128,20 +140,28 @@ class PhotoBrowserCollectionViewController: UICollectionViewController, UICollec
 //            self.photos.addObjectsFromArray(photoInfos)
 //            self.collectionView?.reloadData()
 //        }
-        Alamofire.request(Five100px.Router.PopularPhotos(self.currentPage)).response() {
+        //这里我们首次使用了我们创建的路由。只需将页数传递进去，它将为该页面构造 URL 字符串。500px.com 网站在每次 API 调用后返回大约50张图片，因此您需要为下一批照片的显示再次调用路由。
+        Alamofire.request(Five100px.Router.PopularPhotos(self.currentPage)).responseJSON() {
             (_, _, JSON, error) in
+            println(JSON)
             
-            if error != nil {
+            if error == nil {
+                // 要注意，.responseJSON()后面的代码块：completion handler(完成处理方法)必须在主线程运行。如果您正在执行其他的长期运行操作，比如说调用 API，那么您必须使用 GCD 来将您的代码调度到另一个队列运行。在本示例中，我们使用`DISPATCH_QUEUE_PRIORITY_HIGH`来运行这个操作。
                 dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0)) {
+                    // 您可能会关心 JSON 数据中的photos关键字，其位于数组中的字典中。每个字典都包含有一张图片的信息。
+                    // 我们使用 Swift 的filter函数来过滤掉 NSFW 图片（Not Safe For Work）
+                    //map函数接收了一个闭包，然后返回一个PhotoInfo对象的数组。这个类是在Five100px.swift当中定义的。如果您查看这个类的源码，那么就可以看到它重写了isEqual和hash这两个方法。这两个方法都是用一个整型的id属性，因此排序和唯一化（uniquing）PhotoInfo对象仍会是一个比较快的操作
                     let photoInfos = ((JSON as! NSDictionary).valueForKey("photos") as! [NSDictionary]).filter( {
                         ($0["nsfw"] as! Bool) == false } ).map {
                         PhotoInfo(id: $0["id"] as! Int, url: $0["image_url"] as! String)
                     }
-                    
+                    //接下来我们会在添加新的数据前存储图片的当前数量，使用它来更新collectionView.
                     let lastItem = self.photos.count
+                    //如果有人在我们滚动前向 500px.com 网站上传了新的图片，那么您所获得的新的一批照片将可能会包含一部分已下载的图片。这就是为什么我们定义var photos = NSMutableOrderedSet()为一个组。由于组内的项目必须唯一，因此重复的图片不会再次出现
                     self.photos.addObjectsFromArray(photoInfos)
+                    //这里我们创建了一个NSIndexPath对象的数组，并将其插入到collectionView.
                     let indexPath = (lastItem..<self.photos.count).map {NSIndexPath(forItem: $0, inSection: 0)}
-            
+                    //在集合视图中插入项目，请在主队列中完成该操作，因为所有的 UIKit 操作都必须运行在主队列中
                     dispatch_async(dispatch_get_main_queue()) {
                         self.collectionView?.insertItemsAtIndexPaths(indexPath)
                     }
@@ -158,7 +178,8 @@ class PhotoBrowserCollectionViewController: UICollectionViewController, UICollec
 
 class PhotoBrowserCollectionViewCell: UICollectionViewCell {
   let imageView = UIImageView()
-  
+  var request:  Alamofire.Request?
+
   required init(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
   }
@@ -170,6 +191,7 @@ class PhotoBrowserCollectionViewCell: UICollectionViewCell {
     
     imageView.frame = bounds
     addSubview(imageView)
+    
   }
 }
 
