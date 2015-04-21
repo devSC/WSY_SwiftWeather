@@ -10,104 +10,130 @@ import UIKit
 import Alamofire
 
 class PhotoBrowserCollectionViewController: UICollectionViewController, UICollectionViewDelegateFlowLayout {
-  var photos = NSMutableOrderedSet()
-  
-  let refreshControl = UIRefreshControl()
-  var populationPhotos = false
-  var currentPage = 1
-
+    var photos = NSMutableOrderedSet()
     
-  
-  let PhotoBrowserCellIdentifier = "PhotoBrowserCell"
-  let PhotoBrowserFooterViewIdentifier = "PhotoBrowserFooterView"
-  
-  // MARK: Life-cycle
-  
-  override func viewDidLoad() {
-    super.viewDidLoad()
+    let refreshControl = UIRefreshControl()
+    var populationPhotos = false
+    var currentPage = 1
+    let imageCache = NSCache()
     
-    setupView()
-    populatePhotos()
     
-  }
-  
-  override func didReceiveMemoryWarning() {
-    super.didReceiveMemoryWarning()
-  }
-  
-  // MARK: CollectionView
-  
-  override func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-    return photos.count
-  }
-  
-  override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-    let cell = collectionView.dequeueReusableCellWithReuseIdentifier(PhotoBrowserCellIdentifier, forIndexPath: indexPath) as! PhotoBrowserCollectionViewCell
-    let imageUrl = (photos.objectAtIndex(indexPath.row) as! PhotoInfo).url
-//    Alamofire.request(.GET, imageUrl).response() {
-//        (_, _, data, _) in
-//        let image = UIImage(data: data! as! NSData)
-//        cell.imageView.image = image
-//    }
-    //way2
-    cell.imageView.image = nil
-    cell.request = Alamofire.request(.GET, imageUrl).responseImage() {
-        //{ (<#NSURLRequest#>, <#NSHTTPURLResponse?#>, <#UIImage?#>, <#NSError?#>) -> Void in
-        (request, _, image, error) in
-        if error == nil && image != nil {
-            if request.URLString == cell.request?.request.URLString {
-                cell.imageView.image = image
+    
+    let PhotoBrowserCellIdentifier = "PhotoBrowserCell"
+    let PhotoBrowserFooterViewIdentifier = "PhotoBrowserFooterView"
+    
+    // MARK: Life-cycle
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        setupView()
+        populatePhotos()
+        
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+    }
+    
+    // MARK: CollectionView
+    
+    override func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return photos.count
+    }
+    
+    override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(PhotoBrowserCellIdentifier, forIndexPath: indexPath) as! PhotoBrowserCollectionViewCell
+        let imageUrl = (photos.objectAtIndex(indexPath.row) as! PhotoInfo).url
+        //    Alamofire.request(.GET, imageUrl).response() {
+        //        (_, _, data, _) in
+        //        let image = UIImage(data: data! as! NSData)
+        //        cell.imageView.image = image
+        //    }
+        //way2
+//        cell.imageView.image = nil
+//        cell.request = Alamofire.request(.GET, imageUrl).responseImage() {
+//            //{ (<#NSURLRequest#>, <#NSHTTPURLResponse?#>, <#UIImage?#>, <#NSError?#>) -> Void in
+//            (request, _, image, error) in
+//            if error == nil && image != nil {
+//                if request.URLString == cell.request?.request.URLString {
+//                    cell.imageView.image = image
+//                }
+//            }
+//        }
+        //cache version
+        //1 the dequeued cell may already have an Alamofire request attached to it. You can simply cancel it because it’s no longer valid for this new cell.
+        cell.request?.cancel()
+        //2 Use optional binding to check if you have a cached version of this photo. If so, use the cached version instead of downloading it again.
+        if let image = self.imageCache.objectForKey(imageUrl) as? UIImage {
+            cell.imageView.image = image
+        } else {
+            //3 If you don’t have a cached version of the photo, download it. However, the the dequeued cell may be already showing another image; in this case, set it to nil so that the cell is blank while the requested photo is downloaded.
+            cell.imageView.image = nil
+            //4  Download the image from the server, but this time validate the content-type of the returned response. If it’s not an image, error will contain a value and therefore you won’t do anything with the potentially invalid image response. The key here is that you you store the Alamofire request object in the cell, for use when your asynchronous network call returns.
+            cell.request = Alamofire.request(.GET, imageUrl).validate(contentType: ["image/*"]).responseImage() {
+                (request, _, image, error) in
+                if error == nil && image != nil {
+                    //5 If you did not receive an error and you downloaded a proper photo, cache it for later.
+                    self.imageCache.setObject(image!, forKey: request.URLString)
+                    //6 Set the cell’s image accordingly.
+                    cell.imageView.image = image
+                } else {
+                    /*
+                    If the cell went off-screen before the image was downloaded, we cancel it and
+                    an NSURLErrorDomain (-999: cancelled) is returned. This is a normal behavior.
+                    */
+                }
             }
         }
+        return cell
     }
-    return cell
-  }
-  
-  override func collectionView(collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, atIndexPath indexPath: NSIndexPath) -> UICollectionReusableView {
-    return collectionView.dequeueReusableSupplementaryViewOfKind(kind, withReuseIdentifier: PhotoBrowserFooterViewIdentifier, forIndexPath: indexPath) as! UICollectionReusableView
-  }
-  
-  override func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-    performSegueWithIdentifier("ShowPhoto", sender: (self.photos.objectAtIndex(indexPath.item) as! PhotoInfo).id)
-  }
-  
-  // MARK: Helper
     
-    
-  func setupView() {
-    navigationController?.setNavigationBarHidden(false, animated: true)
-    
-    let layout = UICollectionViewFlowLayout()
-    let itemWidth = (view.bounds.size.width - 2) / 3
-    layout.itemSize = CGSize(width: itemWidth, height: itemWidth)
-    layout.minimumInteritemSpacing = 1.0
-    layout.minimumLineSpacing = 1.0
-    layout.footerReferenceSize = CGSize(width: collectionView!.bounds.size.width, height: 100.0)
-    
-    collectionView!.collectionViewLayout = layout
-    
-    let titleLabel = UILabel(frame: CGRect(x: 0.0, y: 0.0, width: 60.0, height: 30.0))
-    titleLabel.text = "Photomania"
-    titleLabel.textColor = UIColor.whiteColor()
-    titleLabel.font = UIFont.preferredFontForTextStyle(UIFontTextStyleHeadline)
-    navigationItem.titleView = titleLabel
-    
-    collectionView!.registerClass(PhotoBrowserCollectionViewCell.classForCoder(), forCellWithReuseIdentifier: PhotoBrowserCellIdentifier)
-    collectionView!.registerClass(PhotoBrowserCollectionViewLoadingCell.classForCoder(), forSupplementaryViewOfKind: UICollectionElementKindSectionFooter, withReuseIdentifier: PhotoBrowserFooterViewIdentifier)
-    
-    refreshControl.tintColor = UIColor.whiteColor()
-    refreshControl.addTarget(self, action: "handleRefresh", forControlEvents: .ValueChanged)
-    collectionView!.addSubview(refreshControl)
-    
-      }
-  
-  override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-    if segue.identifier == "ShowPhoto" {
-      (segue.destinationViewController as! PhotoViewerViewController).photoID = sender!.integerValue
-      (segue.destinationViewController as! PhotoViewerViewController).hidesBottomBarWhenPushed = true
+    override func collectionView(collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, atIndexPath indexPath: NSIndexPath) -> UICollectionReusableView {
+        return collectionView.dequeueReusableSupplementaryViewOfKind(kind, withReuseIdentifier: PhotoBrowserFooterViewIdentifier, forIndexPath: indexPath) as! UICollectionReusableView
     }
-  }
-    //MARK - 
+    
+    override func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+        performSegueWithIdentifier("ShowPhoto", sender: (self.photos.objectAtIndex(indexPath.item) as! PhotoInfo).id)
+    }
+    
+    // MARK: Helper
+    
+    
+    func setupView() {
+        navigationController?.setNavigationBarHidden(false, animated: true)
+        
+        let layout = UICollectionViewFlowLayout()
+        let itemWidth = (view.bounds.size.width - 2) / 3
+        layout.itemSize = CGSize(width: itemWidth, height: itemWidth)
+        layout.minimumInteritemSpacing = 1.0
+        layout.minimumLineSpacing = 1.0
+        layout.footerReferenceSize = CGSize(width: collectionView!.bounds.size.width, height: 100.0)
+        
+        collectionView!.collectionViewLayout = layout
+        
+        let titleLabel = UILabel(frame: CGRect(x: 0.0, y: 0.0, width: 60.0, height: 30.0))
+        titleLabel.text = "Photomania"
+        titleLabel.textColor = UIColor.whiteColor()
+        titleLabel.font = UIFont.preferredFontForTextStyle(UIFontTextStyleHeadline)
+        navigationItem.titleView = titleLabel
+        
+        collectionView!.registerClass(PhotoBrowserCollectionViewCell.classForCoder(), forCellWithReuseIdentifier: PhotoBrowserCellIdentifier)
+        collectionView!.registerClass(PhotoBrowserCollectionViewLoadingCell.classForCoder(), forSupplementaryViewOfKind: UICollectionElementKindSectionFooter, withReuseIdentifier: PhotoBrowserFooterViewIdentifier)
+        
+        refreshControl.tintColor = UIColor.whiteColor()
+        refreshControl.addTarget(self, action: "handleRefresh", forControlEvents: .ValueChanged)
+        collectionView!.addSubview(refreshControl)
+        
+    }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == "ShowPhoto" {
+            (segue.destinationViewController as! PhotoViewerViewController).photoID = sender!.integerValue
+            (segue.destinationViewController as! PhotoViewerViewController).hidesBottomBarWhenPushed = true
+        }
+    }
+    //MARK -
     override func scrollViewDidScroll(scrollView: UIScrollView) {
         // 一旦您滚动超过了 80% 的页面，那么scrollViewDidScroll()方法将会加载更多的图片。
         if scrollView.contentOffset.y + view.frame.size.height > scrollView.contentSize.height * 0.8 {
@@ -115,10 +141,16 @@ class PhotoBrowserCollectionViewController: UICollectionViewController, UICollec
         }
     }
     
-  
-  func handleRefresh() {
     
-  }
+    func handleRefresh() {
+        
+        refreshControl.beginRefreshing()
+        self.photos.removeAllObjects()
+        self.currentPage = 1
+        self.collectionView?.reloadData()
+        populatePhotos()
+        refreshControl.endRefreshing()
+    }
     
     func populatePhotos() {
         //2.populatePhotos()方法在currentPage当中加载图片，并且使用populatingPhotos作为标记，以防止还在加载当前界面时加载下一个页面。
@@ -127,19 +159,19 @@ class PhotoBrowserCollectionViewController: UICollectionViewController, UICollec
         }
         populationPhotos = true
         
-//        Alamofire.request( .GET, "https://api.500px.com/v1/photos", parameters:["consumer_key" : "pdGG0ze5dXKbNXOtlqFKAoBCf8azKNn8dqF47q6M"]).responseJSON() /*当网络请求完毕后，responseJSON()方法会调用我们所提供的闭包, 在这里我们只是简单的将经过解析的 JSON 输出到控制台中*/ {
-//            //        (req, response, object, error) in
-//            (_, _, JSON, error) in
-//            println(JSON)
-//            if error != nil {
-//                return;
-//            }
-//            
-//            let photoInfos = ((JSON as! NSDictionary).valueForKey("photos") as! [NSDictionary]).filter({ ($0["nsfw"] as! Bool) == false }).map { PhotoInfo(id: $0["id"] as! Int, url: $0["image_url"] as! String) }
-//            
-//            self.photos.addObjectsFromArray(photoInfos)
-//            self.collectionView?.reloadData()
-//        }
+        //        Alamofire.request( .GET, "https://api.500px.com/v1/photos", parameters:["consumer_key" : "pdGG0ze5dXKbNXOtlqFKAoBCf8azKNn8dqF47q6M"]).responseJSON() /*当网络请求完毕后，responseJSON()方法会调用我们所提供的闭包, 在这里我们只是简单的将经过解析的 JSON 输出到控制台中*/ {
+        //            //        (req, response, object, error) in
+        //            (_, _, JSON, error) in
+        //            println(JSON)
+        //            if error != nil {
+        //                return;
+        //            }
+        //
+        //            let photoInfos = ((JSON as! NSDictionary).valueForKey("photos") as! [NSDictionary]).filter({ ($0["nsfw"] as! Bool) == false }).map { PhotoInfo(id: $0["id"] as! Int, url: $0["image_url"] as! String) }
+        //
+        //            self.photos.addObjectsFromArray(photoInfos)
+        //            self.collectionView?.reloadData()
+        //        }
         //这里我们首次使用了我们创建的路由。只需将页数传递进去，它将为该页面构造 URL 字符串。500px.com 网站在每次 API 调用后返回大约50张图片，因此您需要为下一批照片的显示再次调用路由。
         Alamofire.request(Five100px.Router.PopularPhotos(self.currentPage)).responseJSON() {
             (_, _, JSON, error) in
@@ -153,7 +185,7 @@ class PhotoBrowserCollectionViewController: UICollectionViewController, UICollec
                     //map函数接收了一个闭包，然后返回一个PhotoInfo对象的数组。这个类是在Five100px.swift当中定义的。如果您查看这个类的源码，那么就可以看到它重写了isEqual和hash这两个方法。这两个方法都是用一个整型的id属性，因此排序和唯一化（uniquing）PhotoInfo对象仍会是一个比较快的操作
                     let photoInfos = ((JSON as! NSDictionary).valueForKey("photos") as! [NSDictionary]).filter( {
                         ($0["nsfw"] as! Bool) == false } ).map {
-                        PhotoInfo(id: $0["id"] as! Int, url: $0["image_url"] as! String)
+                            PhotoInfo(id: $0["id"] as! Int, url: $0["image_url"] as! String)
                     }
                     //接下来我们会在添加新的数据前存储图片的当前数量，使用它来更新collectionView.
                     let lastItem = self.photos.count
@@ -177,36 +209,36 @@ class PhotoBrowserCollectionViewController: UICollectionViewController, UICollec
 }
 
 class PhotoBrowserCollectionViewCell: UICollectionViewCell {
-  let imageView = UIImageView()
-  var request:  Alamofire.Request?
-
-  required init(coder aDecoder: NSCoder) {
-    super.init(coder: aDecoder)
-  }
-  
-  override init(frame: CGRect) {
-    super.init(frame: frame)
+    let imageView = UIImageView()
+    var request:  Alamofire.Request?
     
-    backgroundColor = UIColor(white: 0.1, alpha: 1.0)
+    required init(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
     
-    imageView.frame = bounds
-    addSubview(imageView)
-    
-  }
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        
+        backgroundColor = UIColor(white: 0.1, alpha: 1.0)
+        
+        imageView.frame = bounds
+        addSubview(imageView)
+        
+    }
 }
 
 class PhotoBrowserCollectionViewLoadingCell: UICollectionReusableView {
-  let spinner = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.WhiteLarge)
-  
-  required init(coder aDecoder: NSCoder) {
-    super.init(coder: aDecoder)
-  }
-  
-  override init(frame: CGRect) {
-    super.init(frame: frame)
+    let spinner = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.WhiteLarge)
     
-    spinner.startAnimating()
-    spinner.center = self.center
-    addSubview(spinner)
-  }
+    required init(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        
+        spinner.startAnimating()
+        spinner.center = self.center
+        addSubview(spinner)
+    }
 }

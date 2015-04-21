@@ -29,9 +29,7 @@ class PhotoViewerViewController: UIViewController, UIScrollViewDelegate, UIPopov
     
   }
     func downloadImage() {
-    
-
-    }
+         }
   
     func loadPhoto() {
       Alamofire.request(Five100px.Router.PhotoInfo(self.photoID, .Large)).validate().responseObject() { //<#completionHandler: (NSURLRequest, NSHTTPURLResponse?, T?, NSError?) -> Void##(NSURLRequest, NSHTTPURLResponse?, T?, NSError?) -> Void#>
@@ -212,6 +210,57 @@ class PhotoViewerViewController: UIViewController, UIScrollViewDelegate, UIPopov
   }
   
   func downloadPhoto() {
+    
+//    Alamofire.request(<#method: Method#>, <#URLString: URLStringConvertible#>, parameters: <#[String : AnyObject]?#>, encoding: <#ParameterEncoding#>)
+    
+    //1 You first request a new PhotoInfo, only this time asking for an XLarge size image.
+    Alamofire.request(Five100px.Router.PhotoInfo(photoInfo!.id, .XLarge)).validate().responseObject() {
+        (_, _, photoInfo: PhotoInfo?, error) in
+        
+        if error == nil && photoInfo != nil {
+//            let jsonDictionary = JSON as! NSDictionary
+//            let imageURL = jsonDictionary.valueForKeyPath("photo.image_url") as! String
+            let imageURL = photoInfo!.url
+            
+            //2 Get the default location on disk to which to save your files — this will be a subdirectory in the Documents directory of your app. The name of the file on disk will be the same as the name that the server suggests. destination is a closure in disguise — more on that in just a moment.
+            //                let destination = Alamofire.Request.suggestedDownloadDestination(directory: .DocumentDirectory , domain:  .UserDomainMask)
+            let destination: (NSURL, NSHTTPURLResponse) -> (NSURL) = {
+                (temporaryURL, response) in
+                if let direcoryURL = NSFileManager.defaultManager().URLsForDirectory( .DocumentDirectory, inDomains: .UserDomainMask)[0] as? NSURL {
+                    return direcoryURL.URLByAppendingPathComponent("\(self.photoInfo?.id).\(response.suggestedFilename)")
+                }
+                return temporaryURL
+            }
+            
+            //3 Alamofire.download(_:_:_) is a bit different than Alamofire.request(_:_) in that it doesn’t need a response handler or a serializer in order to perform an operation on the data, as it already knows what to do with it — save it to disk! The destination closure returns the location of the saved image.
+            
+            //                Alamofire.download(.GET, imageURL, destination)
+            // 4
+            let progressIndicatorView = UIProgressView(frame: CGRect(x: 0.0, y: 80.0, width: self.view.bounds.width, height: 10.0))
+            progressIndicatorView.tintColor = UIColor.redColor()
+            self.view.addSubview(progressIndicatorView)
+            
+            // 5
+            Alamofire.download(.GET, imageURL, destination).progress {
+                (_, totalBytesRead, totalBytesExpectedToRead) in
+                
+                dispatch_async(dispatch_get_main_queue()) {
+                    // 6
+                    progressIndicatorView.setProgress(Float(totalBytesRead) / Float(totalBytesExpectedToRead), animated: true)
+                    println("progress: \(Float(totalBytesRead) / Float(totalBytesExpectedToRead))")
+                    
+                    // 7
+                    if totalBytesRead == totalBytesExpectedToRead {
+                        progressIndicatorView.removeFromSuperview()
+                    }
+                }
+            }
+            
+        }
+    }
+    
+
+    
   }
   
   // MARK: Gesture Recognizers

@@ -39,7 +39,7 @@ println("哈喽，\(名字)")
     static func collection(#responser: NSHTTPURLResponse, representation: AnyObject) -> [Self]
 }
 extension Alamofire.Request {
-    public func responseCollection<T: ResponseCollectionSerializable>(completionHandler: (NSURLRequest, NSHTTPURLResponse?, T?, NSError?) -> Void) -> Self {
+    public func responseCollection<T: ResponseCollectionSerializable>(completionHandler: (NSURLRequest, NSHTTPURLResponse?, [T]?, NSError?) -> Void) -> Self {
         let serializer: Serializer = { (request, response, data) in
             let JSONSerializer = Request.JSONResponseSerializer(options:  .AllowFragments)
             let (JSON: AnyObject?, serializationError) = JSONSerializer(request, response, data)
@@ -50,7 +50,7 @@ extension Alamofire.Request {
             }
         }
         return response(serializer: serializer, completionHandler: { (request, response, object, error) -> Void in
-            completionHandler(request, response, object as? T, error)
+            completionHandler(request, response, object as? [T], error)
         })
     }
 }
