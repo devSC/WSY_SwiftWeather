@@ -8,6 +8,10 @@
 
 import UIKit
 import CoreLocation
+import Alamofire
+import SwiftyJSON
+
+
 
 class ViewController: UIViewController, CLLocationManagerDelegate {
 
@@ -64,9 +68,30 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         
         println(params)
         
-        
+        Alamofire.request(.GET, url, parameters: params).responseJSON() {
+            (resquest, response, json, error) in
+            if error == nil {
+                println("successRequest: \(url)")
+                var json = JSON(json!)
+                self.updateUISuccess(json)
+            }
+        }
         
     }
+    
+    func updateUISuccess(json: JSON) {
+        self.loading.text = nil
+        self.loadingIndicator.hidden = true
+        self.loadingIndicator.stopAnimating()
+        
+        let service = WeatherService()
+        if let tempResult = json["city"]["country"].double {
+        
+        }
+        
+//        let service = swiff
+    }
+    
     //MARK: - CLLocationManagerDelegate
     func locationManager(manager: CLLocationManager!, didUpdateLocations locations: [AnyObject]!) {
         var location: CLLocation = locations[locations.count - 1] as! CLLocation

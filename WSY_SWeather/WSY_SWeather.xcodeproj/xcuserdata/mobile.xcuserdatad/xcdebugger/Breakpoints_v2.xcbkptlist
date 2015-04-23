@@ -10,12 +10,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "WSY_SWeather/ViewController.swift"
-            timestampString = "451189465.572101"
+            timestampString = "451460796.535625"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "57"
-            endingLineNumber = "57"
-            landmarkName = "didReceiveMemoryWarning()"
+            startingLineNumber = "85"
+            endingLineNumber = "85"
+            landmarkName = "updateUISuccess(_:)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
